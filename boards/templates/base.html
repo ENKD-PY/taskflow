@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>TaskFlow</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+
+        :root {
+            --bg-main: #0f172a;
+            --bg-secondary: #111827;
+            --bg-card: #1e293b;
+            --text-main: white;
+            --text-secondary: #cbd5e1;
+            --primary: #2563eb;
+        }
+
+        body.light-mode {
+            --bg-main: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+        }
+
+        body {
+            background: var(--bg-main);
+            color: var(--text-main);
+            transition: 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        .navbar-custom {
+            background: rgba(15,23,42,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 14px 30px;
+        }
+
+        body.light-mode .navbar-custom {
+            background: rgba(255,255,255,0.8);
+        }
+
+        .sidebar {
+            width: 270px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #020617, #0f172a);
+            padding: 30px 20px;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        body.light-mode .sidebar {
+            background: white;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        .menu-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            padding: 14px 18px;
+            border-radius: 14px;
+            width: 100%;
+            text-align: left;
+            transition: 0.25s;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(4px);
+        }
+
+        .menu-btn.active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        .main-content {
+            padding: 35px;
+            width: 100%;
+        }
+
+        .board-card,
+        .list-card,
+        .task-card,
+        .stats-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 20px;
+            transition: 0.25s ease;
+        }
+
+        .board-card:hover,
+        .task-card:hover,
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .btn {
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(37,99,235,0.4);
+        }
+
+        .theme-toggle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.08);
+            color: white;
+            transition: 0.2s;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+        }
+
+        body.light-mode .theme-toggle {
+            color: black;
+            background: rgba(0,0,0,0.05);
+        }
+
+        ::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 20px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-custom d-flex justify-content-between">
+
+    <div class="d-flex align-items-center gap-3">
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="bi bi-moon-stars-fill"></i>
+        </button>
+        <span class="fw-bold fs-4">🚀 TaskFlow</span>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+        <div class="avatar">
+            {{ request.user.username|slice:":1"|upper }}
+        </div>
+        <span>{{ request.user.username }}</span>
+        <form method="POST" action="/logout/">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-sm">Logout</button>
+        </form>
+    </div>
+
+</nav>
+
+<div class="d-flex">
+
+    <div class="sidebar">
+
+        <div class="logo">📋 Menú</div>
+
+        <a href="/">
+            <button class="menu-btn active">
+                <i class="bi bi-house"></i>
+                Inicio
+            </button>
+        </a>
+
+        <button class="menu-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#crearBoardModal">
+            <i class="bi bi-plus-circle"></i>
+            Nuevo Board
+        </button>
+
+    </div>
+
+    <div class="main-content fade-in">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode')
+        localStorage.setItem('theme',
+            document.body.classList.contains('light-mode') ? 'light' : 'dark')
+    }
+
+    if(localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode')
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

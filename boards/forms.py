@@ -1,23 +1,24 @@
 from django import forms
-from django.contrib.auth.models import User
+
 from django.contrib.auth.forms import UserCreationForm
+
+from django.contrib.auth.models import User
 
 from .models import Board, Lista, Tarjeta
 
 
 class RegisterForm(UserCreationForm):
 
-    email = forms.EmailField()
-
     class Meta:
+
         model = User
 
         fields = [
             'username',
-            'email',
             'password1',
             'password2'
         ]
+
 
 class BoardForm(forms.ModelForm):
 
@@ -25,4 +26,84 @@ class BoardForm(forms.ModelForm):
 
         model = Board
 
-        fields = ['nombre']    
+        fields = ['nombre']
+
+        widgets = {
+
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control'
+            })
+
+        }
+
+
+class ListaForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Lista
+
+        fields = ['nombre']
+
+        widgets = {
+
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control'
+            })
+
+        }
+
+
+class TarjetaForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Tarjeta
+
+        fields = [
+            'titulo',
+            'descripcion',
+            'lista',
+            'fecha_limite',
+            'prioridad',
+            'color',
+            'etiqueta',
+            'completada'
+        ]
+
+        widgets = {
+
+            'titulo': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control'
+            }),
+
+            'lista': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+
+            'fecha_limite': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+
+            'prioridad': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+
+            'color': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+
+            'etiqueta': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'completada': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+        }

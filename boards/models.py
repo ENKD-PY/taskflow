@@ -31,6 +31,14 @@ class Lista(models.Model):
 
 class Tarjeta(models.Model):
 
+    PRIORIDADES = [
+
+        ('BAJA', 'Baja'),
+        ('MEDIA', 'Media'),
+        ('ALTA', 'Alta'),
+
+    ]
+
     titulo = models.CharField(max_length=200)
 
     descripcion = models.TextField(blank=True)
@@ -41,7 +49,44 @@ class Tarjeta(models.Model):
         related_name='tarjetas'
     )
 
-    creada = models.DateTimeField(auto_now_add=True)
+    creada = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    fecha_limite = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    prioridad = models.CharField(
+        max_length=10,
+        choices=PRIORIDADES,
+        default='MEDIA'
+    )
+
+    COLOR_CHOICES = [
+    ('primary', 'Azul'),
+    ('success', 'Verde'),
+    ('danger', 'Rojo'),
+    ('warning', 'Amarillo'),
+    ('dark', 'Negro'),
+    ('info', 'Celeste'),
+    ]
+
+    color = models.CharField(
+    max_length=20,
+    choices=COLOR_CHOICES,
+    default='primary'
+    )
+    etiqueta = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    completada = models.BooleanField(
+        default=False
+    )
 
     def __str__(self):
+
         return self.titulo
