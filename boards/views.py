@@ -205,6 +205,11 @@ def board_detail(request, board_id):
                 )
             )
 
+    # Contadores por lista
+    for lista in listas:
+        lista.total_count = lista.tarjetas.count()
+        lista.completadas_count = lista.tarjetas.filter(completada=True).count()
+
     return render(request, 'boards/detail.html', {
 
         'board': board,
@@ -309,6 +314,21 @@ def editar_tarjeta(request, tarjeta_id):
     return render(request, 'tarjetas/editar.html', {
         'form': form
     })
+@login_required
+def toggle_completada(request, tarjeta_id):
+
+    tarjeta = get_object_or_404(
+        Tarjeta,
+        id=tarjeta_id,
+        lista__board__usuario=request.user
+    )
+
+    tarjeta.completada = not tarjeta.completada
+    tarjeta.save()
+
+    return redirect(f'/board/{tarjeta.lista.board.id}/')
+
+
 @login_required
 def eliminar_tarjeta(request, tarjeta_id):
 

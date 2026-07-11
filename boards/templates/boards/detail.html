@@ -133,11 +133,13 @@
 
         <div class="d-flex justify-content-between mb-3">
 
-            <h4>
+            <div>
 
-                {{ lista.nombre }}
+                <h4 class="mb-0">{{ lista.nombre }}</h4>
 
-            </h4>
+                <small class="text-secondary">&#10004; {{ lista.completadas_count }}/{{ lista.total_count }} completadas</small>
+
+            </div>
 
             <div class="dropdown">
 
@@ -163,13 +165,9 @@
 
                     <li>
 
-                        <button class="dropdown-item text-danger"
-                                data-bs-toggle="modal"
-                                data-bs-target="#eliminarLista{{ lista.id }}">
-
-                            Eliminar
-
-                        </button>
+                        <a class="dropdown-item text-danger"
+                           href="/lista/{{ lista.id }}/eliminar/"
+                           onclick="return confirm('¿Eliminar la lista {{ lista.nombre }}? Se borrarán todas sus tarjetas.')">Eliminar</a>
 
                     </li>
 
@@ -343,7 +341,22 @@
 
                 {% endif %}
 
-                <div class="d-flex gap-2 mt-3">
+                <div class="d-flex gap-2 mt-3 align-items-center">
+
+                    <form method="POST" action="/tarjeta/{{ tarjeta.id }}/toggle/" style="display:inline;">
+                        {% csrf_token %}
+                        {% if tarjeta.completada %}
+                        <button type="submit" title="Marcar como pendiente"
+                                style="border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; background:#22c55e; color:white;">
+                            &#10004;
+                        </button>
+                        {% else %}
+                        <button type="submit" title="Marcar como completada"
+                                style="border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; background:transparent; color:#6b7280; border:2px solid #6b7280;">
+                            &#9675;
+                        </button>
+                        {% endif %}
+                    </form>
 
                     <a href="/tarjeta/{{ tarjeta.id }}/editar/"
                        class="btn btn-warning btn-sm">
@@ -352,13 +365,9 @@
 
                     </a>
 
-                    <button class="btn btn-danger btn-sm"
-                            data-bs-toggle="modal"
-                            data-bs-target="#eliminarTarjeta{{ tarjeta.id }}">
-
-                        Eliminar
-
-                    </button>
+                    <a href="/tarjeta/{{ tarjeta.id }}/eliminar/"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Eliminar la tarjeta {{ tarjeta.titulo }}?')">Eliminar</a>
 
                 </div>
 

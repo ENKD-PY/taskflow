@@ -67,4 +67,10 @@ urlpatterns = [
     views.eliminar_lista,
     name='eliminar_lista'
     ),
+
+    path(
+    'tarjeta/<int:tarjeta_id>/toggle/',
+    views.toggle_completada,
+    name='toggle_completada'
+    ),
 ]
