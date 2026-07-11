@@ -2,34 +2,102 @@
 
 {% block content %}
 
-<div class="row justify-content-center">
+<div class="row justify-content-center mt-3">
+    <div class="col-md-7 col-lg-6">
 
-    <div class="col-md-6">
+        <a href="javascript:history.back()" style="color:#60a5fa;text-decoration:none;font-size:0.9rem;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;transition:0.2s;">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
 
-        <div class="card bg-dark text-light shadow p-4">
+        <div class="card shadow" style="background:rgba(17,24,39,0.95);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:36px;">
 
-            <h2 class="mb-4">
-                ✏️ Editar Tarjeta
-            </h2>
+            <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#d97706,#b45309);display:flex;justify-content:center;align-items:center;font-size:1.4rem;margin-bottom:14px;box-shadow:0 8px 20px rgba(180,83,9,0.4);">
+                ✏️
+            </div>
+
+            <h2 style="color:white;font-weight:bold;margin-bottom:4px;">Editar Tarjeta</h2>
+            <p style="color:#9ca3af;font-size:0.9rem;margin-bottom:28px;">Modificá los detalles de esta tarea</p>
+
+            <style>
+                label { color:#d1d5db; margin-bottom:5px; font-size:0.88rem; font-weight:500; display:block; }
+                input[type=text], input[type=date], textarea, select {
+                    background:#1f2937 !important; border:1px solid #374151 !important;
+                    color:white !important; border-radius:12px !important;
+                    padding:11px 14px !important; width:100%;
+                }
+                input[type=text]:focus, input[type=date]:focus, textarea:focus, select:focus {
+                    border-color:#3b82f6 !important;
+                    box-shadow:0 0 0 0.2rem rgba(59,130,246,0.25) !important;
+                    outline:none !important;
+                }
+                textarea { resize:vertical; min-height:100px; }
+                select option { background:#1f2937; }
+                .field-group { margin-bottom:18px; }
+                .row-fields { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+                input[type=checkbox] { width:18px !important; height:18px !important; padding:0 !important; border-radius:5px !important; cursor:pointer; }
+                ul.errorlist { list-style:none; padding:0; margin:4px 0 0; }
+                ul.errorlist li { color:#f87171; font-size:0.82rem; }
+            </style>
 
             <form method="POST">
-
                 {% csrf_token %}
 
-                {{ form.as_p }}
+                <div class="field-group">
+                    <label><i class="bi bi-card-text" style="color:#60a5fa"></i> Título</label>
+                    {{ form.titulo }}
+                    {% if form.titulo.errors %}<ul class="errorlist">{% for e in form.titulo.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
 
-                <button class="btn btn-warning w-100">
+                <div class="field-group">
+                    <label><i class="bi bi-justify-left" style="color:#60a5fa"></i> Descripción</label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}<ul class="errorlist">{% for e in form.descripcion.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
 
+                <div class="row-fields">
+                    <div class="field-group">
+                        <label><i class="bi bi-calendar-event" style="color:#60a5fa"></i> Fecha límite</label>
+                        {{ form.fecha_limite }}
+                        {% if form.fecha_limite.errors %}<ul class="errorlist">{% for e in form.fecha_limite.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="field-group">
+                        <label><i class="bi bi-flag-fill" style="color:#60a5fa"></i> Prioridad</label>
+                        {{ form.prioridad }}
+                        {% if form.prioridad.errors %}<ul class="errorlist">{% for e in form.prioridad.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row-fields">
+                    <div class="field-group">
+                        <label><i class="bi bi-palette-fill" style="color:#60a5fa"></i> Color</label>
+                        {{ form.color }}
+                        {% if form.color.errors %}<ul class="errorlist">{% for e in form.color.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="field-group">
+                        <label><i class="bi bi-tag-fill" style="color:#60a5fa"></i> Etiqueta</label>
+                        {{ form.etiqueta }}
+                        {% if form.etiqueta.errors %}<ul class="errorlist">{% for e in form.etiqueta.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                </div>
+
+                <div class="field-group" style="display:flex;align-items:center;gap:10px;">
+                    {{ form.completada }}
+                    <label for="{{ form.completada.id_for_label }}" style="margin:0;cursor:pointer;">
+                        <i class="bi bi-check-circle-fill" style="color:#22c55e"></i>
+                        Marcar como completada
+                    </label>
+                </div>
+
+                <button style="background:linear-gradient(135deg,#d97706,#b45309);border:none;border-radius:12px;padding:13px;font-weight:bold;color:white;width:100%;margin-top:8px;transition:0.25s;cursor:pointer;font-size:1rem;"
+                        onmouseover="this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                    <i class="bi bi-floppy-fill"></i>
                     Guardar Cambios
-
                 </button>
 
             </form>
-
         </div>
-
     </div>
-
 </div>
 
 {% endblock %}

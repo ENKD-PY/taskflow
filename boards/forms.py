@@ -63,7 +63,6 @@ class TarjetaForm(forms.ModelForm):
         fields = [
             'titulo',
             'descripcion',
-            'lista',
             'fecha_limite',
             'prioridad',
             'color',
@@ -79,10 +78,6 @@ class TarjetaForm(forms.ModelForm):
 
             'descripcion': forms.Textarea(attrs={
                 'class': 'form-control'
-            }),
-
-            'lista': forms.Select(attrs={
-                'class': 'form-select'
             }),
 
             'fecha_limite': forms.DateInput(attrs={
