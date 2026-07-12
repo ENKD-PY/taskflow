@@ -73,4 +73,28 @@ urlpatterns = [
     views.toggle_completada,
     name='toggle_completada'
     ),
+
+    path(
+    'tarjeta/<int:tarjeta_id>/mover/',
+    views.mover_tarjeta,
+    name='mover_tarjeta'
+    ),
+
+    path(
+    'api/reordenar-tarjetas/',
+    views.reordenar_tarjetas,
+    name='reordenar_tarjetas'
+    ),
+
+    path(
+    'api/reordenar-listas/',
+    views.reordenar_listas,
+    name='reordenar_listas'
+    ),
+
+    path(
+    'buscar/',
+    views.busqueda_global,
+    name='busqueda_global'
+    ),
 ]

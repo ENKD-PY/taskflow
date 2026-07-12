@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+import json
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -210,12 +212,38 @@ def board_detail(request, board_id):
         lista.total_count = lista.tarjetas.count()
         lista.completadas_count = lista.tarjetas.filter(completada=True).count()
 
+    # Filtros adicionales
+    color_f    = request.GET.get('color', '')
+    etiqueta_f = request.GET.get('etiqueta', '')
+    estado_f   = request.GET.get('estado', '')
+
+    for lista in listas:
+        qs = lista.tarjetas_filtradas
+        if color_f:
+            qs = qs.filter(color=color_f)
+        if etiqueta_f:
+            qs = qs.filter(etiqueta__icontains=etiqueta_f)
+        if estado_f == 'completada':
+            qs = qs.filter(completada=True)
+        elif estado_f == 'pendiente':
+            qs = qs.filter(completada=False)
+        lista.tarjetas_filtradas = qs
+
+    # Todas las listas del board para el selector "mover tarjeta"
+    todas_las_listas = board.listas.all()
+
     return render(request, 'boards/detail.html', {
-
         'board': board,
-
-        'listas': listas
-
+        'listas': listas,
+        'todas_las_listas': todas_las_listas,
+        'today': date.today(),
+        'filtros': {
+            'q': request.GET.get('q', ''),
+            'prioridad': request.GET.get('prioridad', ''),
+            'color': color_f,
+            'etiqueta': etiqueta_f,
+            'estado': estado_f,
+        }
     })
 
 
@@ -328,6 +356,65 @@ def toggle_completada(request, tarjeta_id):
 
     return redirect(f'/board/{tarjeta.lista.board.id}/')
 
+
+
+@login_required
+def mover_tarjeta(request, tarjeta_id):
+    tarjeta = get_object_or_404(
+        Tarjeta,
+        id=tarjeta_id,
+        lista__board__usuario=request.user
+    )
+    if request.method == 'POST':
+        nueva_lista_id = request.POST.get('nueva_lista')
+        nueva_lista = get_object_or_404(
+            Lista,
+            id=nueva_lista_id,
+            board__usuario=request.user
+        )
+        tarjeta.lista = nueva_lista
+        tarjeta.save()
+    return redirect(f'/board/{tarjeta.lista.board.id}/')
+
+
+@login_required
+def reordenar_tarjetas(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        for item in data:
+            Tarjeta.objects.filter(
+                id=item['id'],
+                lista__board__usuario=request.user
+            ).update(orden=item['orden'], lista_id=item['lista_id'])
+    return JsonResponse({'ok': True})
+
+
+@login_required
+def reordenar_listas(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        for item in data:
+            Lista.objects.filter(
+                id=item['id'],
+                board__usuario=request.user
+            ).update(orden=item['orden'])
+    return JsonResponse({'ok': True})
+
+
+@login_required
+def busqueda_global(request):
+    q = request.GET.get('q', '').strip()
+    resultados = []
+    if q:
+        resultados = Tarjeta.objects.filter(
+            lista__board__usuario=request.user
+        ).filter(
+            titulo__icontains=q
+        ).select_related('lista', 'lista__board')
+    return render(request, 'boards/busqueda.html', {
+        'resultados': resultados,
+        'q': q
+    })
 
 @login_required
 def eliminar_tarjeta(request, tarjeta_id):

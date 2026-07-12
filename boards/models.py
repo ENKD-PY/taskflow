@@ -25,6 +25,11 @@ class Lista(models.Model):
         related_name='listas'
     )
 
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['orden']
+
     def __str__(self):
         return self.nombre
 
@@ -86,6 +91,11 @@ class Tarjeta(models.Model):
     completada = models.BooleanField(
         default=False
     )
+
+    orden = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['orden']
 
     def __str__(self):
 

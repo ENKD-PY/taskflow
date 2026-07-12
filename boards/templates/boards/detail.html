@@ -76,51 +76,53 @@
 
 </div>
 
-<form method="GET"
-      class="row mb-4">
-
-    <div class="col-md-5">
-
-        <input type="text"
-               name="q"
-               class="form-control"
-               placeholder="Buscar tarjeta...">
-
-    </div>
+<form method="GET" class="row g-2 mb-4">
 
     <div class="col-md-3">
-
-        <select name="prioridad"
-                class="form-select">
-
-            <option value="">
-                Todas las prioridades
-            </option>
-
-            <option value="BAJA">
-                Baja
-            </option>
-
-            <option value="MEDIA">
-                Media
-            </option>
-
-            <option value="ALTA">
-                Alta
-            </option>
-
-        </select>
-
+        <input type="text" name="q" class="form-control"
+               placeholder="Buscar tarjeta..."
+               value="{{ filtros.q }}">
     </div>
 
     <div class="col-md-2">
+        <select name="prioridad" class="form-select">
+            <option value="">Todas las prioridades</option>
+            <option value="BAJA"  {% if filtros.prioridad == 'BAJA'  %}selected{% endif %}>Baja</option>
+            <option value="MEDIA" {% if filtros.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
+            <option value="ALTA"  {% if filtros.prioridad == 'ALTA'  %}selected{% endif %}>Alta</option>
+        </select>
+    </div>
 
+    <div class="col-md-2">
+        <select name="color" class="form-select">
+            <option value="">Todos los colores</option>
+            <option value="primary" {% if filtros.color == 'primary' %}selected{% endif %}>Azul</option>
+            <option value="success" {% if filtros.color == 'success' %}selected{% endif %}>Verde</option>
+            <option value="danger"  {% if filtros.color == 'danger'  %}selected{% endif %}>Rojo</option>
+            <option value="warning" {% if filtros.color == 'warning' %}selected{% endif %}>Amarillo</option>
+            <option value="dark"    {% if filtros.color == 'dark'    %}selected{% endif %}>Negro</option>
+            <option value="info"    {% if filtros.color == 'info'    %}selected{% endif %}>Celeste</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select name="estado" class="form-select">
+            <option value="">Todos los estados</option>
+            <option value="pendiente"  {% if filtros.estado == 'pendiente'  %}selected{% endif %}>Pendiente</option>
+            <option value="completada" {% if filtros.estado == 'completada' %}selected{% endif %}>Completada</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <input type="text" name="etiqueta" class="form-control"
+               placeholder="Etiqueta..."
+               value="{{ filtros.etiqueta }}">
+    </div>
+
+    <div class="col-md-1">
         <button class="btn btn-primary w-100">
-
-            Buscar
-
+            <i class="bi bi-search"></i>
         </button>
-
     </div>
 
 </form>
@@ -129,7 +131,7 @@
 
     {% for lista in listas %}
 
-    <div class="list-card p-3 shadow">
+    <div class="list-card p-3 shadow" data-lista-id="{{ lista.id }}">
 
         <div class="d-flex justify-content-between mb-3">
 
@@ -264,9 +266,10 @@
 
         </div>
 
+        <div class="tarjetas-container" data-lista-id="{{ lista.id }}">
         {% for tarjeta in lista.tarjetas_filtradas %}
 
-        <div class="card task-card mb-3 bg-{{ tarjeta.color }}
+        <div class="card task-card mb-3 bg-{{ tarjeta.color }} tarjeta-item" data-tarjeta-id="{{ tarjeta.id }}"
 
             {% if tarjeta.color == 'warning' or tarjeta.color == 'light' %}
                 text-dark
@@ -358,6 +361,26 @@
                         {% endif %}
                     </form>
 
+                    <!-- MOVER TARJETA -->
+                    <div class="dropdown">
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                            Mover
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% for lst in todas_las_listas %}
+                            {% if lst.id != tarjeta.lista.id %}
+                            <li>
+                                <form method="POST" action="/tarjeta/{{ tarjeta.id }}/mover/">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="nueva_lista" value="{{ lst.id }}">
+                                    <button type="submit" class="dropdown-item">{{ lst.nombre }}</button>
+                                </form>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+
                     <a href="/tarjeta/{{ tarjeta.id }}/editar/"
                        class="btn btn-warning btn-sm">
 
@@ -439,6 +462,7 @@
         </p>
 
         {% endfor %}
+        </div><!-- fin tarjetas-container -->
 
     </div>
 
@@ -497,4 +521,54 @@
 
 </div>
 
+
+<!-- SORTABLEJS DRAG & DROP -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+// Drag & drop en tarjetas
+document.querySelectorAll('.tarjetas-container').forEach(function(container) {
+    new Sortable(container, {
+        group: 'tarjetas',
+        animation: 150,
+        onEnd: function() {
+            var payload = [];
+            document.querySelectorAll('.tarjetas-container').forEach(function(cont) {
+                var listaId = cont.dataset.listaId;
+                cont.querySelectorAll('.tarjeta-item').forEach(function(el, idx) {
+                    payload.push({
+                        id: el.dataset.tarjetaId,
+                        orden: idx,
+                        lista_id: listaId
+                    });
+                });
+            });
+            fetch('/api/reordenar-tarjetas/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+                body: JSON.stringify(payload)
+            });
+        }
+    });
+});
+
+// Drag & drop en listas
+var boardContainer = document.querySelector('.d-flex.gap-4.overflow-auto');
+if (boardContainer) {
+    new Sortable(boardContainer, {
+        animation: 150,
+        handle: 'h4',
+        onEnd: function() {
+            var payload = [];
+            boardContainer.querySelectorAll('[data-lista-id]').forEach(function(el, idx) {
+                payload.push({ id: el.dataset.listaId, orden: idx });
+            });
+            fetch('/api/reordenar-listas/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+                body: JSON.stringify(payload)
+            });
+        }
+    });
+}
+</script>
 {% endblock %}
