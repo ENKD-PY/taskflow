@@ -14,23 +14,40 @@
 
 <div class="container mt-5">
 
-    <div class="card shadow p-4">
+    <div class="row justify-content-center">
 
-        <h2>
-            ✏️ Editar Tablero
-        </h2>
+        <div class="col-md-6">
 
-        <form method="POST">
+            <div class="card shadow p-4">
 
-            {% csrf_token %}
+                <h2 class="mb-4">
+                    ✏️ Editar Tablero
+                </h2>
 
-            {{ form.as_p }}
+                <form method="POST">
 
-            <button class="btn btn-primary">
-                Actualizar
-            </button>
+                    {% csrf_token %}
 
-        </form>
+                    {{ form.as_p }}
+
+                    <div class="d-flex gap-2">
+
+                        <button class="btn btn-primary w-100">
+                            Actualizar
+                        </button>
+
+                        <a href="/"
+                           class="btn btn-secondary w-100">
+                            Cancelar
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
 
     </div>
 

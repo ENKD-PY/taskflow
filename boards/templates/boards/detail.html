@@ -1,0 +1,584 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h1>
+        📋 {{ board.nombre }}
+    </h1>
+
+    <button class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#crearListaModal">
+
+        + Nueva Lista
+
+    </button>
+
+</div>
+
+<!-- MODAL CREAR LISTA -->
+
+<div class="modal fade"
+     id="crearListaModal"
+     tabindex="-1">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content bg-dark text-white">
+
+            <form method="POST"
+                  action="/board/{{ board.id }}/lista/crear/">
+
+                {% csrf_token %}
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+
+                        Nueva Lista
+
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="text"
+                           name="nombre"
+                           class="form-control"
+                           placeholder="Nombre de la lista"
+                           required>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-primary">
+
+                        Crear Lista
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<form method="GET" class="row g-2 mb-4">
+
+    <div class="col-md-2">
+        <input type="text" name="lista_q" class="form-control"
+               placeholder="Buscar lista..."
+               value="{{ filtros.lista_q }}">
+    </div>
+
+    <div class="col-md-2">
+        <input type="text" name="q" class="form-control"
+               placeholder="Buscar tarjeta..."
+               value="{{ filtros.q }}">
+    </div>
+
+    <div class="col-md-2">
+        <select name="prioridad" class="form-select">
+            <option value="">Todas las prioridades</option>
+            <option value="BAJA"  {% if filtros.prioridad == 'BAJA'  %}selected{% endif %}>Baja</option>
+            <option value="MEDIA" {% if filtros.prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
+            <option value="ALTA"  {% if filtros.prioridad == 'ALTA'  %}selected{% endif %}>Alta</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select name="color" class="form-select">
+            <option value="">Todos los colores</option>
+            <option value="primary" {% if filtros.color == 'primary' %}selected{% endif %}>Azul</option>
+            <option value="success" {% if filtros.color == 'success' %}selected{% endif %}>Verde</option>
+            <option value="danger"  {% if filtros.color == 'danger'  %}selected{% endif %}>Rojo</option>
+            <option value="warning" {% if filtros.color == 'warning' %}selected{% endif %}>Amarillo</option>
+            <option value="dark"    {% if filtros.color == 'dark'    %}selected{% endif %}>Negro</option>
+            <option value="info"    {% if filtros.color == 'info'    %}selected{% endif %}>Celeste</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select name="estado" class="form-select">
+            <option value="">Todos los estados</option>
+            <option value="pendiente"  {% if filtros.estado == 'pendiente'  %}selected{% endif %}>Pendiente</option>
+            <option value="completada" {% if filtros.estado == 'completada' %}selected{% endif %}>Completada</option>
+        </select>
+    </div>
+
+    <div class="col-md-1">
+        <input type="text" name="etiqueta" class="form-control"
+               placeholder="Etiqueta..."
+               value="{{ filtros.etiqueta }}">
+    </div>
+
+    <div class="col-md-1">
+        <button class="btn btn-primary w-100">
+            <i class="bi bi-search"></i>
+        </button>
+    </div>
+
+</form>
+
+<div class="d-flex gap-4 overflow-auto pb-4">
+
+    {% for lista in listas %}
+
+    <div class="list-card p-3 shadow" data-lista-id="{{ lista.id }}">
+
+        <div class="d-flex justify-content-between mb-3">
+
+            <div>
+
+                <h4 class="mb-0">{{ lista.nombre }}</h4>
+
+                <small class="text-secondary">&#10004; {{ lista.completadas_count }}/{{ lista.total_count }} completadas</small>
+
+            </div>
+
+            <div class="dropdown">
+
+                <button class="btn btn-dark btn-sm"
+                        data-bs-toggle="dropdown">
+
+                    ⋮
+
+                </button>
+
+                <ul class="dropdown-menu">
+
+                    <li>
+
+                        <a class="dropdown-item"
+                           href="/lista/{{ lista.id }}/editar/">
+
+                            Editar
+
+                        </a>
+
+                    </li>
+
+                    <li>
+
+                        <a class="dropdown-item text-danger"
+                           href="/lista/{{ lista.id }}/eliminar/"
+                           onclick="return confirm('¿Eliminar la lista {{ lista.nombre }}? Se borrarán todas sus tarjetas.')">Eliminar</a>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+        <button class="btn btn-success btn-sm w-100 mb-3"
+                data-bs-toggle="modal"
+                data-bs-target="#crearTarjeta{{ lista.id }}">
+
+            + Tarjeta
+
+        </button>
+
+        <!-- MODAL CREAR TARJETA -->
+
+        <div class="modal fade"
+             id="crearTarjeta{{ lista.id }}"
+             tabindex="-1">
+
+            <div class="modal-dialog">
+
+                <div class="modal-content bg-dark text-white">
+
+                    <form method="POST"
+                          action="/lista/{{ lista.id }}/tarjeta/crear/">
+
+                        {% csrf_token %}
+
+                        <div class="modal-header">
+
+                            <h5 class="modal-title">
+
+                                Nueva Tarjeta
+
+                            </h5>
+
+                            <button type="button"
+                                    class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal">
+                            </button>
+
+                        </div>
+
+                        <div class="modal-body d-grid gap-3">
+
+                            <input type="text"
+                                   name="titulo"
+                                   class="form-control"
+                                   placeholder="Título"
+                                   required>
+
+                            <textarea name="descripcion"
+                                      class="form-control"
+                                      placeholder="Descripción"></textarea>
+
+                            <select name="prioridad"
+                                    class="form-select">
+
+                                <option value="BAJA">
+                                    Baja
+                                </option>
+
+                                <option value="MEDIA">
+                                    Media
+                                </option>
+
+                                <option value="ALTA">
+                                    Alta
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="modal-footer">
+
+                            <button class="btn btn-success">
+
+                                Crear Tarjeta
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="tarjetas-container" data-lista-id="{{ lista.id }}">
+        {% for tarjeta in lista.tarjetas_filtradas %}
+
+        <div class="card task-card mb-3 bg-{{ tarjeta.color }} tarjeta-item" data-tarjeta-id="{{ tarjeta.id }}"
+
+            {% if tarjeta.color == 'warning' or tarjeta.color == 'light' %}
+                text-dark
+            {% else %}
+                text-white
+            {% endif %}
+
+            {% if tarjeta.completada %}
+                border border-success border-3
+            {% endif %}
+        ">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between">
+
+                    <strong>
+
+                        {{ tarjeta.titulo }}
+
+                    </strong>
+
+                    <span class="badge bg-dark">
+
+                        {{ tarjeta.prioridad }}
+
+                    </span>
+
+                </div>
+
+                <p class="mt-3">
+
+                    {{ tarjeta.descripcion }}
+
+                </p>
+
+                <div class="mt-2 d-flex gap-2 flex-wrap">
+
+                    {% if tarjeta.etiqueta %}
+
+                    <span class="badge bg-dark">
+
+                        #{{ tarjeta.etiqueta }}
+
+                    </span>
+
+                    {% endif %}
+
+                    {% if tarjeta.completada %}
+
+                    <span class="badge bg-success">
+
+                        ✔ Completada
+
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+                {% if tarjeta.fecha_limite %}
+
+                <small class="
+                    {% if tarjeta.fecha_limite < today %}
+                        text-danger fw-bold
+                    {% endif %}
+                ">
+
+                    📅 {{ tarjeta.fecha_limite }}
+
+                </small>
+
+                {% endif %}
+
+                <div class="d-flex gap-2 mt-3 align-items-center">
+
+                    <form method="POST" action="/tarjeta/{{ tarjeta.id }}/toggle/" style="display:inline;">
+                        {% csrf_token %}
+                        {% if tarjeta.completada %}
+                        <button type="submit" title="Marcar como pendiente"
+                                style="border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; background:#22c55e; color:white;">
+                            &#10004;
+                        </button>
+                        {% else %}
+                        <button type="submit" title="Marcar como completada"
+                                style="border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; background:transparent; color:#6b7280; border:2px solid #6b7280;">
+                            &#9675;
+                        </button>
+                        {% endif %}
+                    </form>
+
+                    <!-- MOVER TARJETA -->
+                    <div class="dropdown">
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                            Mover
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% for lst in todas_las_listas %}
+                            {% if lst.id != tarjeta.lista.id %}
+                            <li>
+                                <form method="POST" action="/tarjeta/{{ tarjeta.id }}/mover/">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="nueva_lista" value="{{ lst.id }}">
+                                    <button type="submit" class="dropdown-item">{{ lst.nombre }}</button>
+                                </form>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <a href="/tarjeta/{{ tarjeta.id }}/editar/"
+                       class="btn btn-warning btn-sm">
+
+                        Editar
+
+                    </a>
+
+                    <a href="/tarjeta/{{ tarjeta.id }}/eliminar/"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Eliminar la tarjeta {{ tarjeta.titulo }}?')">Eliminar</a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- MODAL ELIMINAR TARJETA -->
+
+        <div class="modal fade"
+             id="eliminarTarjeta{{ tarjeta.id }}"
+             tabindex="-1">
+
+            <div class="modal-dialog">
+
+                <div class="modal-content bg-dark text-white">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">
+
+                            Confirmar eliminación
+
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        ¿Eliminar la tarjeta
+                        <strong>{{ tarjeta.titulo }}</strong>?
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+
+                            Cancelar
+
+                        </button>
+
+                        <a href="/tarjeta/{{ tarjeta.id }}/eliminar/"
+                           class="btn btn-danger">
+
+                            Sí, eliminar
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <p>
+            No hay tarjetas.
+        </p>
+
+        {% endfor %}
+        </div><!-- fin tarjetas-container -->
+
+    </div>
+
+    <!-- MODAL ELIMINAR LISTA -->
+
+    <div class="modal fade"
+         id="eliminarLista{{ lista.id }}"
+         tabindex="-1">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content bg-dark text-white">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+
+                        Eliminar Lista
+
+                    </h5>
+
+                </div>
+
+                <div class="modal-body">
+
+                    ¿Seguro que deseas eliminar
+                    <strong>{{ lista.nombre }}</strong>?
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+                    <a href="/lista/{{ lista.id }}/eliminar/"
+                       class="btn btn-danger">
+
+                        Eliminar
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- SORTABLEJS DRAG & DROP -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+// Drag & drop en tarjetas
+document.querySelectorAll('.tarjetas-container').forEach(function(container) {
+    new Sortable(container, {
+        group: 'tarjetas',
+        animation: 150,
+        onEnd: function() {
+            var payload = [];
+            document.querySelectorAll('.tarjetas-container').forEach(function(cont) {
+                var listaId = cont.dataset.listaId;
+                cont.querySelectorAll('.tarjeta-item').forEach(function(el, idx) {
+                    payload.push({
+                        id: el.dataset.tarjetaId,
+                        orden: idx,
+                        lista_id: listaId
+                    });
+                });
+            });
+            fetch('/api/reordenar-tarjetas/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+                body: JSON.stringify(payload)
+            }).then(function() {
+                location.reload();
+            });
+        }
+    });
+});
+
+// Drag & drop en listas
+var boardContainer = document.querySelector('.d-flex.gap-4.overflow-auto');
+if (boardContainer) {
+    new Sortable(boardContainer, {
+        animation: 150,
+        handle: 'h4',
+        onEnd: function() {
+            var payload = [];
+            boardContainer.querySelectorAll('[data-lista-id]').forEach(function(el, idx) {
+                payload.push({ id: el.dataset.listaId, orden: idx });
+            });
+            fetch('/api/reordenar-listas/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+                body: JSON.stringify(payload)
+            }).then(function() {
+                location.reload();
+            });
+        }
+    });
+}
+</script>
+{% endblock %}
