@@ -78,7 +78,13 @@
 
 <form method="GET" class="row g-2 mb-4">
 
-    <div class="col-md-3">
+    <div class="col-md-2">
+        <input type="text" name="lista_q" class="form-control"
+               placeholder="Buscar lista..."
+               value="{{ filtros.lista_q }}">
+    </div>
+
+    <div class="col-md-2">
         <input type="text" name="q" class="form-control"
                placeholder="Buscar tarjeta..."
                value="{{ filtros.q }}">
@@ -113,7 +119,7 @@
         </select>
     </div>
 
-    <div class="col-md-2">
+    <div class="col-md-1">
         <input type="text" name="etiqueta" class="form-control"
                placeholder="Etiqueta..."
                value="{{ filtros.etiqueta }}">
@@ -546,6 +552,8 @@ document.querySelectorAll('.tarjetas-container').forEach(function(container) {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
                 body: JSON.stringify(payload)
+            }).then(function() {
+                location.reload();
             });
         }
     });
@@ -566,6 +574,8 @@ if (boardContainer) {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
                 body: JSON.stringify(payload)
+            }).then(function() {
+                location.reload();
             });
         }
     });

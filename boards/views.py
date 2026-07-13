@@ -177,6 +177,12 @@ def board_detail(request, board_id):
 
     prioridad = request.GET.get('prioridad')
 
+    lista_q = request.GET.get('lista_q', '').strip()
+
+    # Filtrar listas por nombre si se busca lista
+    if lista_q:
+        listas = listas.filter(nombre__icontains=lista_q)
+
     if query:
 
         listas = listas.prefetch_related('tarjetas')
@@ -229,6 +235,11 @@ def board_detail(request, board_id):
             qs = qs.filter(completada=False)
         lista.tarjetas_filtradas = qs
 
+    # Ocultar listas sin tarjetas solo cuando hay filtros activos
+    hay_filtros = any([query, prioridad, color_f, etiqueta_f, estado_f, lista_q])
+    if hay_filtros:
+        listas = [l for l in listas if l.tarjetas_filtradas.exists()]
+
     # Todas las listas del board para el selector "mover tarjeta"
     todas_las_listas = board.listas.all()
 
@@ -243,6 +254,7 @@ def board_detail(request, board_id):
             'color': color_f,
             'etiqueta': etiqueta_f,
             'estado': estado_f,
+            'lista_q': lista_q,
         }
     })
 
@@ -404,15 +416,20 @@ def reordenar_listas(request):
 @login_required
 def busqueda_global(request):
     q = request.GET.get('q', '').strip()
-    resultados = []
+    resultados_tarjetas = []
+    resultados_listas = []
     if q:
-        resultados = Tarjeta.objects.filter(
-            lista__board__usuario=request.user
-        ).filter(
+        resultados_tarjetas = Tarjeta.objects.filter(
+            lista__board__usuario=request.user,
             titulo__icontains=q
         ).select_related('lista', 'lista__board')
+        resultados_boards = Board.objects.filter(
+            usuario=request.user,
+            nombre__icontains=q
+        )
     return render(request, 'boards/busqueda.html', {
-        'resultados': resultados,
+        'resultados_tarjetas': resultados_tarjetas,
+        'resultados_boards': resultados_boards,
         'q': q
     })
 
